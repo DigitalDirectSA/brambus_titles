@@ -14,11 +14,11 @@
 						
 //PROBLEM: Importing does not work on wix from the iFrame
 	
-//import * as THREE from '../build/three.module.js';
-//import Stats from './jsm/libs/stats.module.js';
-//import { OrbitControls } from './jsm/controls/OrbitControls.js';
-//import { GLTFLoader } from './jsm/loaders/GLTFLoader.js';
-//import { DRACOLoader } from './jsm/loaders/DRACOLoader.js';
+import * as THREE from '../build/three.module.js';
+import Stats from './jsm/libs/stats.module.js';
+import { OrbitControls } from './jsm/controls/OrbitControls.js';
+import { GLTFLoader } from './jsm/loaders/GLTFLoader.js';
+import { DRACOLoader } from './jsm/loaders/DRACOLoader.js';
 
 var scene, camera, pointLight;
 var renderer, controls;
