@@ -52,21 +52,21 @@ var container = document.getElementById( 'container' );
 			
 //---------------------------------------------------------------------------------------------------
 
-renderer = new THREE.WebGLRenderer( { antialias: true, alpha: true } );
+renderer = new WebGLRenderer( { antialias: true, alpha: true } );
 renderer.setPixelRatio( window.devicePixelRatio );
 renderer.setSize( window.innerWidth, window.innerHeight );
-renderer.outputEncoding = THREE.sRGBEncoding;
+renderer.outputEncoding = sRGBEncoding;
 						
 			
 container.appendChild( renderer.domElement );
 			
 			
-scene = new THREE.Scene();
+scene = new Scene();
 scene.background = null;//new THREE.Color( 0xffffff );
 			
 			
 //This is the camera controls. First parameter is FOV, then aspect, then near clip, then far clip
-camera = new THREE.PerspectiveCamera( 40, window.innerWidth / window.innerHeight, .01, 100 );
+camera = new PerspectiveCamera( 40, window.innerWidth / window.innerHeight, .01, 100 );
 //Set the camera position
 camera.position.set( 0, 0, 0.3 );
 			
@@ -80,16 +80,16 @@ camera.position.set( 0, 0, 0.3 );
 //---------------------------------------------------------------------------------------------------
 //Lights
 
-scene.add( new THREE.AmbientLight( 0x404040 ) );
+scene.add( new AmbientLight( 0x404040 ) );
 
-pointLight = new THREE.PointLight( 0xffffff, 1 );
+pointLight = new PointLight( 0xffffff, 1 );
 pointLight.position.copy( camera.position );
 scene.add( pointLight );
 
 // envmap - This is easily loaded when the file is uploaded to wix.
 var path = 'https://static.wixstatic.com/media/dd3a53_e48ffeceffb4460b8d8e1509e716d943~mv2.jpg';
 var format = '.jpg';
-var envMap = new THREE.CubeTextureLoader().load( 
+var envMap = new CubeTextureLoader().load( 
 	[
 	path + 'posx' + format, path + 'negx' + format,
 	path + 'posy' + format, path + 'negy' + format,
@@ -99,11 +99,11 @@ var envMap = new THREE.CubeTextureLoader().load(
 //---------------------------------------------------------------------------------------------------
 //Model Loaders
 	
-var dracoLoader = new THREE.DRACOLoader();
+var dracoLoader = new DRACOLoader();
 //This important, version number here has to match the loader, and the threejs package.
 dracoLoader.setDecoderPath( 'https://cdn.jsdelivr.net/npm/three@0.115.0/examples/js/libs/draco/draco_decoder.js' );
 			
-var loader = new THREE.GLTFLoader();
+var loader = new GLTFLoader();
 loader.setDRACOLoader( dracoLoader );
 			
 //Array for drag controls later on
@@ -217,7 +217,7 @@ loader.load( 'https://drive.google.com/uc?export=download&id=1nszE_EftdllISNl3Jj
 //---------------------------------------------------------------------------------------------------
 //Drag Controls.
 
-	var dragControls = new THREE.DragControls( objects, camera, renderer.domElement );
+	var dragControls = new DragControls( objects, camera, renderer.domElement );
 		
 	dragControls.addEventListener( 'dragstart', function ( event ) 
 		{ 
