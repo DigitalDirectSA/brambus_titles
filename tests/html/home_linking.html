@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>Coded Animation by Digital Direct SA</title>
+		<meta charset="utf-8">
+	
+		<style>
+			
+			body 
+			{
+				background-color: #289AF7;
+				color: #000;
+			}
+
+			
+			a 
+			{
+				color: #2878ff;
+			}
+			
+			
+					
+		</style>
+	</head>
+
+	<body>
+		
+		
+		<table width="100%">
+			
+			<tr>
+				<th><h3>Created by <a href="http://www.digitaldirectsa.co.za">Digital Direct SA</a></h3></th>
+			</tr>
+			<tr>
+				<th><h3>Powered by <a href="http://www.threejs.org">ThreeJS</a></h3></th>
+			</tr>
+			<tr><!--This is where the ThreeJS Canvas will be injected-->
+				<th><div id="container" ></div></th>
+			</tr>
+			<tr>
+				<th><h4>Brambus Productions</h4></th>
+			</tr>
+		</table>
+		
+		<div id="javasciptlinks">
+			<script src="https://cdn.jsdelivr.net/npm/jquery@3.4.1/dist/jquery.min.js"></script>
+			<script src="https://cdn.jsdelivr.net/npm/three@0.115.0/build/three.min.js"></script>		
+			<script src="https://cdn.jsdelivr.net/npm/three@0.115.0/examples/js/controls/DragControls.js"></script>
+			<script src="https://cdn.jsdelivr.net/npm/three@0.115.0/examples/js/loaders/GLTFLoader.js"></script>
+			<script src="https://cdn.jsdelivr.net/npm/three@0.115.0/examples/js/loaders/DRACOLoader.js"></script>		
+			<script src="https://cdn.jsdelivr.net/npm/cors-anywhere@0.4.1/lib/cors-anywhere.js"></script>
+			
+		</div>
+
+		
+
+		<script type="text/javascript" >
+			
+			
+			//---Direct Links---//
+			
+			//models
+			
+			//shopstatic = 'https://drive.google.com/uc?export=download&id=1ZlDTxvCDolsZ925o5GVyurXpJW5XM1yG';
+			//shopanimated = 'https://drive.google.com/uc?export=download&id=1xBVJnmT2ge7GOGNZbeZDvIpgFuTaLnEw';
+			
+				
+			var scene, camera, pointLight;
+			var renderer, mixer, controls;
+
+			
+			var container = document.getElementById( 'container' );
+			
+			
+			//---------------------------------------------------------------------------------------------------
+			//CORS Anywhere to enable cross domain requests
+			
+			(function() 
+			{
+				var cors_api_host = 'cors-anywhere.herokuapp.com';
+				var cors_api_url = 'https://' + cors_api_host + '/';
+				var slice = [].slice;
+				var origin = window.location.protocol + '//' + window.location.host;
+				var open = XMLHttpRequest.prototype.open;
+				XMLHttpRequest.prototype.open = function() 
+				{
+					var args = slice.call(arguments);
+					var targetOrigin = /^https?:\/\/([^\/]+)/i.exec(args[1]);
+					if (targetOrigin && targetOrigin[0].toLowerCase() !== origin && targetOrigin[1] !== cors_api_host) 
+					{
+						args[1] = cors_api_url + args[1];
+					}
+				return open.apply(this, args);
+    			};
+			})();
+			
+			//---------------------------------------------------------------------------------------------------
+
+			renderer = new THREE.WebGLRenderer( { antialias: true, alpha: true } );//Alpha true makes scene background transparent
+			renderer.setPixelRatio( window.devicePixelRatio );
+			renderer.setSize( window.innerWidth, window.innerHeight );
+			renderer.outputEncoding = THREE.sRGBEncoding;
+						
+			
+			container.appendChild( renderer.domElement );
+			
+			
+			scene = new THREE.Scene();
+			scene.background = null;
+			
+			
+			//This is the camera controls. First parameter is FOV, then aspect, then near clip, then far clip
+			camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, .01, 100 );
+			//Set the camera position
+			camera.position.set( 0.001, -0.05, 0.4 );
+			
+			//Scene Lighting
+			scene.add( new THREE.AmbientLight( 0x404040 ) );
+
+			pointLight = new THREE.PointLight( 0xffffff, 1 );
+			pointLight.position.copy( camera.position );
+			scene.add( pointLight );
+
+			// envmap - This is easily loaded when the file is uploaded to wix.
+			var path = 'https://static.wixstatic.com/media/dd3a53_e48ffeceffb4460b8d8e1509e716d943~mv2.jpg';
+			var format = '.jpg';
+			var envMap = new THREE.CubeTextureLoader().load( [
+				path + 'posx' + format, path + 'negx' + format,
+				path + 'posy' + format, path + 'negy' + format,
+				path + 'posz' + format, path + 'negz' + format
+			] );
+
+			var dracoLoader = new THREE.DRACOLoader();
+			//This important, version number here has to match the loader, and the threejs package.
+			dracoLoader.setDecoderPath( 'https://cdn.jsdelivr.net/npm/three@0.115.0/examples/js/libs/draco/draco_decoder.js' );
+			
+			var loader = new THREE.GLTFLoader();
+			loader.setDRACOLoader( dracoLoader );
+			
+			//Mesh Variables
+
+			var objects = [];
+			var letter_s, letter_h, letter_o, letter_p;
+						
+			//This is loaded from google drive using CORS
+			
+			loader.load( 'https://drive.google.com/uc?export=download&id=1ZlDTxvCDolsZ925o5GVyurXpJW5XM1yG', function ( gltf ) 
+			{
+				var model = gltf.scene;
+				model.position.set( 0, 0, 0 );
+				model.scale.set( 1, 1, 1 );
+				letter_s = model.getObjectByName("shop_S");
+				letter_h = model.getObjectByName("shop_H");
+				letter_o = model.getObjectByName("shop_O");
+				letter_p = model.getObjectByName("shop_P");
+				model.traverse( function ( object ) 
+				{
+
+					if ( object.isMesh ) object.material.envMap = envMap;
+					if ( object.isMesh) objects.push( object );
+
+
+				} );
+
+								
+				scene.add( model );
+				if (letter_s) letter_s.position.set(-0.11,.02,.05);
+				if (letter_h) letter_h.position.set(-0.04,.02,.05);
+				if (letter_o) letter_o.position.set(0.04,.02,.05);
+				if (letter_p) letter_p.position.set(0.12,.02,.05);
+				
+			}, undefined, function ( e ) 
+				{
+
+				console.error( e );
+
+				});
+			
+			
+			//This is the Drag Controls
+			var dragControls = new THREE.DragControls( objects, camera, renderer.domElement );
+			
+			
+			
+			dragControls.addEventListener( 'dragstart', function ( event ) 
+				{ 
+					dragControls.enabled = true;
+					//...stuff that happens when you start dragging
+					
+				});
+						
+			
+			//this is where the mesh needs to move back to it's start position
+			dragControls.addEventListener( 'dragend', function ( event ) 
+
+				{ 
+					dragControls.enabled = false;
+					if (letter_s) letter_s.position.set(-0.11,.02,.05);
+					if (letter_h) letter_h.position.set(-0.04,.02,.05);
+					if (letter_o) letter_o.position.set(0.04,.02,.05);
+					if (letter_p) letter_p.position.set(0.12,.02,.05);
+					//...stuff that happens when you stop dragging.
+					 
+				});
+
+			
+			
+			
+			//This resizes the render when the window gets resized
+			window.onresize = function () {
+
+				camera.aspect = window.innerWidth / window.innerHeight;
+				camera.updateProjectionMatrix();
+
+				renderer.setSize( window.innerWidth, window.innerHeight );
+
+			};
+			
+			
+
+	
+			
+	
+		//Delete out of scope frames to fix rotation speed stacking.
+		function start() 
+		{
+    		if (id !== null) cancelAnimationFrame(id);   
+     	};
+
+		function animate() 
+		{
+    		id = requestAnimationFrame( animate );
+    		render();
+		};
+	
+	
+	//Animation settings are here. This updates every frame
+	//Draw scene
+	var render = function()
+	{
+		if ( letter_s ) letter_s.rotation.y += 0.010;
+    	if ( letter_h ) letter_h.rotation.x += 0.012;
+    	if ( letter_o ) letter_o.rotation.z += 0.014;
+    	if ( letter_p ) letter_p.rotation.y += 0.017;
+		
+		renderer.render(scene,camera);	
+	};
+	
+	
+	//Run Game Loop (update, render, repeat)
+	var id = null;
+	var GameLoop = function()
+	{
+		requestAnimationFrame (GameLoop);
+		if (id !== null) cancelAnimationFrame(id);
+		animate();		
+	};
+	
+	GameLoop();
+
+	
+		</script>
+
+	</body>
+
+</html>
